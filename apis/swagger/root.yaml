@@ -1,0 +1,64 @@
+swagger: "2.0"
+info:
+  description: This is the swagger file that goes with our server code
+  version: "1.0.0"
+  title: Swagger REST Article
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+basePath: "/"
+
+# Paths supported by the server application
+paths:
+  /:
+    get:
+      operationId: "apis.controller.controller.hello_world"
+      tags:
+        - "hello"
+      summary: "hello world"
+      description: "Hello"
+      responses:
+        200:
+          description: "Hello"
+  "/calculate/{x}/{y}":
+    get:
+      parameters:
+      - name: x
+        in: path
+        description: 'description regarding param1'
+        required: true
+        type: integer
+      - name: y
+        in: path
+        description: 'description regarding param2'
+        required: true
+        type: integer
+      operationId: "apis.controller.controller.add_numbers"
+      tags:
+        - "calculate"
+      summary: "calculate"
+      description: "calculate"
+      responses:
+        200:
+          description: "calculate"
+  "/get_answer/{identifier}":
+    get:
+      parameters:
+      - name: identifier
+        in: path
+        description: 'identifier'
+        required: true
+        type: integer
+      operationId: "apis.controller.controller.get_numbers"
+      tags:
+        - "get answer"
+      summary: "get answer"
+      description: "get answer"
+      responses:
+        200:
+          description: "answer"
+        404:
+          description: "does not exist"
+

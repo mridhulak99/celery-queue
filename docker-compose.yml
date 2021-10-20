@@ -1,0 +1,68 @@
+version: "3"
+services:
+  db:
+    image: mysql:8.0.19
+    restart: always
+    container_name: 'db'
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db
+      MYSQL_ROOT_HOST: 0.0.0.0
+      MYSQL_USER: roota
+      MYSQL_PASSWORD: roota
+    volumes:
+        - /db:/docker-entrypoint-initdb.d/:ro
+    networks:
+      - mysql_bridge
+  rabbitmq:
+    restart: always
+    image: rabbitmq:3-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        - 5672:5672
+        - 15672:15672
+    networks:
+      - rabbitmq_bridge
+  flask_app:
+    restart: always
+    container_name: 'flask_app'
+    image: mridhulak99/cloudsek-message-queue:flask
+    links:
+      - db
+      - rabbitmq
+    depends_on:
+      - db
+      - rabbitmq
+    ports:
+      - "5000:5000"
+    environment:
+      SQLALCHEMY_DATABASE_URI: mysql+pymysql://roota:roota@db:3306/db
+      RABBIT_MQ: amqp://guest:guest@rabbitmq:5672/
+    networks:
+      - rabbitmq_bridge
+      - mysql_bridge
+  celery_app:
+    restart: always
+    container_name: 'celery_app'
+    image: mridhulak99/cloudsek-message-queue:celery
+    links:
+      - flask_app
+      - db
+      - rabbitmq
+    depends_on:
+      - flask_app
+      - db
+      - rabbitmq
+    environment:
+      SQLALCHEMY_DATABASE_URI: mysql+pymysql://roota:roota@db:3306/db
+      RABBIT_MQ: amqp://guest:guest@rabbitmq:5672/
+    networks:
+      - rabbitmq_bridge
+      - mysql_bridge
+networks:
+  rabbitmq_bridge:
+    driver: bridge
+  mysql_bridge:
+    driver: bridge
